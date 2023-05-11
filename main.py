@@ -58,4 +58,6 @@ async def delete_book(book: dict):
         return f"delete {book}"
     else:
         return "library is empty"
-# if __name__ == "main":
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
