@@ -16,7 +16,7 @@ async def read_library():
     return books
 
 
-@app.get("/libary/get_book")
+@app.get("/libary/{name}")
 async def read_book(name: str):
     res = []
     if books:
@@ -40,24 +40,24 @@ async def create_book(book: dict):
 
 @app.put("/libary/update")
 async def update_book(book: dict, new_book: dict):
-    if books:
-        for i, book_in_library in enumerate(books):
-            if book_in_library == book:
-                books[i] = new_book
+    if book in books:
+        i = books.index(book)
+        books[i] = new_book
         return "OK"
-    else:
-        return "library is empty"
+    return "Book is not found"
 
 
 @app.delete("/libary/delete")
 async def delete_book(book: dict):
     if books:
-        for book_in_library in books:
-            if book_in_library == book:
-                books.remove(book_in_library)
-        return f"delete {book}"
+        if book in books:
+            books.remove(book)
+            return f"delete {book}"
+        return f"Not found {book}"
     else:
         return "library is empty"
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
