@@ -1,49 +1,56 @@
 from fastapi import FastAPI
+from fastapi import HTTPException
 
 app = FastAPI(
     title="Library"
 )
 
 books = [
-    {"name": "War and Peace", "year": 1873, },
-    {"name": "Harry potter and the philosopher's stone", "year": 1997, },
-    {"name": "Pride and prejudice", "year": 1813, },
+    {"name": "War and Peace", "year_published": 1873, },
+    {"name": "Sapiens", "year_published": 2011, },
+    {"name": "Pride and prejudice", "year_published": 1813, },
 ]
 
 
-@app.get("/libary/get_library")
+@app.get("/library/get_library")
 async def read_library():
     return books
 
 
-@app.get("/libary/{name}")
-async def read_book(name: str):
+@app.get("/libary/{book_name}")
+async def read_book(book_name: str):
     res = []
     if books:
         for book in books:
-            if book["name"] == name:
+            if book["name"] == book_name:
                 res.append(book)
     return res
 
 
 @app.post("/libary/create")
 async def create_book(book: dict):
-    if book not in books:
-        if list(book.keys()) == list(books[0].keys()):
-            books.append(book)
-            return f"Added {book}"
+    if books:
+        if book not in books:
+            if list(book.keys()) == list(books[0].keys()):
+                books.append(book)
+                return f"Added {book}"
+            else:
+                raise HTTPException(status_code=400, detail="incorrect book")
         else:
-            return "incorrect book"
+            return "book is already in library"
     else:
-        return "book is already in library"
+        books.append(book)
+        # this weakness if we clean library and will add bad book
+        return f"Added {book}"
 
 
 @app.put("/libary/update")
 async def update_book(book: dict, new_book: dict):
-    if book in books:
-        i = books.index(book)
-        books[i] = new_book
-        return "OK"
+    if books:
+        if book in books:
+            i = books.index(book)
+            books[i] = new_book
+            return "OK"
     return "Book is not found"
 
 
