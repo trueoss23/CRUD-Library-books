@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi import HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from typing import List
 
 app = FastAPI(
     title="Library"
@@ -8,9 +9,9 @@ app = FastAPI(
 
 
 class Book(BaseModel):
-    book_id: int
-    name: str
-    year_published: int
+    book_id: int = Field(gt=0)
+    name: str = Field(max_length=113)
+    year_published: int = Field(gt=0)
 
 
 books = [
@@ -20,14 +21,14 @@ books = [
 ]
 
 
-@app.get("/library")
+@app.get("/books/", response_model=List[Book])
 async def read_library():
     if books:
         return books
     raise HTTPException(status_code=500, detail="no database")
 
 
-@app.get("/library/{book_id}", status_code=200)
+@app.get("/book/{book_id}", status_code=200, response_model=Book)
 async def read_book(book_id: int):
     if books:
         for book in books:
@@ -36,14 +37,14 @@ async def read_book(book_id: int):
     raise HTTPException(status_code=404, detail="no book with this id")
 
 
-@app.post("/library", status_code=201)
+@app.post("/book/", status_code=201)
 async def create_book(book: Book):
     if books:
         books.append(book)
     raise HTTPException(status_code=500, detail="no database")
 
 
-@app.put("/library", status_code=200)
+@app.put("/book/", status_code=200)
 async def update_book(book: Book, new_book: Book):
     if books:
         if book in books:
@@ -55,7 +56,7 @@ async def update_book(book: Book, new_book: Book):
     raise HTTPException(status_code=404, detail="no such book")
 
 
-@app.delete("/library", status_code=204)
+@app.delete("/book/", status_code=204)
 async def delete_book(book: Book):
     if books:
         if book in books:
