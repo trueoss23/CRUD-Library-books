@@ -38,10 +38,14 @@ async def read_book(book_id: int):
 
 
 @app.post("/book/", status_code=201)
-async def create_book(book: Book):
+async def create_book(new_book: Book):
     if books:
-        books.append(book)
-    raise HTTPException(status_code=500, detail="no database")
+        if any(book.book_id == new_book.book_id for book in books):
+            raise HTTPException(status_code=404,
+                                detail="book with this id already exists")
+        books.append(new_book)
+    else:
+        raise HTTPException(status_code=500, detail="no database")
 
 
 @app.put("/book/", status_code=200)
