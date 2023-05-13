@@ -21,7 +21,7 @@ books = [
 ]
 
 
-@app.get("/books/", response_model=List[Book])
+@app.get("/books/", status_code=200, response_model=List[Book])
 async def read_library():
     if books:
         return books
