@@ -2,6 +2,12 @@ from fastapi import FastAPI
 from fastapi import HTTPException, Path
 from pydantic import BaseModel, Field
 from typing import List
+import configparser
+
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+port = config.getint('server', 'port')
 
 app = FastAPI(
     title="Library"
@@ -75,4 +81,4 @@ async def delete_book(book_id: int = Path(...)):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("main:app", host="127.0.0.1", port=port, reload=True)
