@@ -40,10 +40,8 @@ def book_exists(new_book):
 
 @app.post("/book/", status_code=201)
 async def create_book(new_book: Book):
-    if not books:
-        raise HTTPException(status_code=500, detail="database is down")
     if book_exists(new_book):
-        raise HTTPException(status_code=404,
+        raise HTTPException(status_code=409,
                             detail="book with this id already exists")
     books.append(new_book)
 
@@ -55,10 +53,10 @@ def find_id(books: List, book_id: int) -> List:
 @app.put("/book/{book_id}", status_code=200)
 async def update_book(new_book: Book, book_id: int = Path(...)):
     found = find_id(books, book_id)
-    i = found[0]
     if len(found) == 0:
         raise HTTPException(status_code=404,
                             detail="no such book for update")
+    i = found[0]
     if books[i] == new_book:
         raise HTTPException(status_code=304,
                             detail="no data to change")
