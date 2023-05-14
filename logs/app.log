@@ -1,0 +1,4 @@
+2023-05-14 23:04:32 - my_logger - DEBUG - pes1
+2023-05-14 23:04:32 - my_logger - INFO - pes2
+2023-05-14 23:04:32 - my_logger - WARNING - pes3
+2023-05-14 23:04:32 - my_logger - ERROR - pes4
