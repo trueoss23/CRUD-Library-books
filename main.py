@@ -9,19 +9,6 @@ import logging.config
 
 logging.config.fileConfig('config.ini')
 logger = logging.getLogger('my_logger')
-# logging.config.fileConfig(fname='config.ini', disable_existing_loggers=False)
-# config_parser = configparser.ConfigParser()
-# config_parser.read('config.ini')
-# logger = logging.config.fileConfig('config.ini')
-# logger.setLevel(logging.DEBUG)
-# file_handler = logging.FileHandler('logs/app.log', 'w')
-# formatter = logging.Formatter(
-#     '%(asctime)s - %(levelname)s - %(message)s',
-#     datefmt='%d-%m-%Y %H:%M:%S'
-#     )
-# file_handler.setFormatter(formatter)
-# file_handler.setLevel(logging.WARNING)
-# logger.addHandler(file_handler)
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -47,10 +34,7 @@ books = [
 
 @app.get("/books/", status_code=200, response_model=List[Book])
 async def read_library():
-    logger.debug('pes1')
-    logger.info('pes2')
-    logger.warning('pes3')
-    logger.error('pes4')
+    logger.debug(f'size of database: {len(books)}')
     return books
 
 
@@ -59,6 +43,8 @@ async def read_book(book_id: int):
     for book in books:
         if book.book_id == book_id:
             return book
+    logger.debug(f'id in books: {[elem.book_id for elem in books]}\
+    current id: {book_id}')
     raise HTTPException(status_code=404, detail="no book with this id")
 
 
@@ -72,6 +58,8 @@ async def create_book(new_book: Book):
         raise HTTPException(status_code=409,
                             detail="book with this id already exists")
     books.append(new_book)
+    logger.debug(f'size of database: {len(books)}')
+    return
 
 
 def find_id(books: List, book_id: int) -> List:
