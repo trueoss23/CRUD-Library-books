@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 from fastapi import status
 import json
+from unittest.mock import patch
 # import requests
 from main import app
 # from unittest.mock import Mock
@@ -22,14 +23,11 @@ def test_get_id_uncorrect_id():
 
 
 def test_get_database_correct():
-    # mock_response = Mock()
-    # mock_response.json.return_value = {"id": 1,
-    #                                    "name": "Idiot",
-    #                                    "year_published": 1868}
-    # monkeypatch.setattr(requests, 'get', lambda url: mock_response)
     response = client.get('/books')
     assert response.status_code == status.HTTP_200_OK
-    # assert response.json() == [{"id": 1,
-    #                             "name": "Idiot",
-    #                             "year_published": 1868}]
 
+
+@patch("main.books", [])
+def test_get_database_uncorrect():
+    response = client.get('/books')
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
