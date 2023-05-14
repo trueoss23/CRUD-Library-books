@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi import HTTPException
+from fastapi import HTTPException, Path
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -37,36 +37,49 @@ async def read_book(book_id: int):
     raise HTTPException(status_code=404, detail="no book with this id")
 
 
+def book_exists(new_book):
+    return any(book.book_id == new_book.book_id for book in books)
+
+
 @app.post("/book/", status_code=201)
 async def create_book(new_book: Book):
+    if not books:
+        raise HTTPException(status_code=500, detail="database is down")
+    if book_exists(new_book):
+        raise HTTPException(status_code=404,
+                            detail="book with this id already exists")
+    books.append(new_book)
+
+
+def find_id(books: List, book_id: int) -> List:
+    return [i for i, book in enumerate(books) if book.book_id == book_id]
+
+
+@app.put("/book/{book_id}", status_code=200)
+async def update_book(new_book: Book, book_id: int = Path(...)):
     if books:
-        if any(book.book_id == new_book.book_id for book in books):
+        found = find_id(books, book_id)
+        i = found[0]
+        if len(found) == 0:
             raise HTTPException(status_code=404,
-                                detail="book with this id already exists")
-        books.append(new_book)
-    else:
-        raise HTTPException(status_code=500, detail="no database")
-
-
-@app.put("/book/", status_code=200)
-async def update_book(book: Book, new_book: Book):
-    if books:
-        if book in books:
-            i = books.index(book)
-            if books[i] == new_book:
-                raise HTTPException(status_code=304,
-                                    detail="no data to change")
-            books[i] = new_book
+                                detail="no such book for update")
+        if books[i] == new_book:
+            raise HTTPException(status_code=304,
+                                detail="no data to change")
+        books[i] = new_book
+        return
     raise HTTPException(status_code=404, detail="no such book")
 
 
-@app.delete("/book/", status_code=204)
-async def delete_book(book: Book):
-    if books:
-        if book in books:
-            books.remove(book)
+@app.delete("/book/{book_id}", status_code=204)
+async def delete_book(book_id: int = Path(...)):
+    if not books:
+        raise HTTPException(status_code=500, detail="database is down")
+    found = find_id(books, book_id)
+    if len(found) == 0:
         raise HTTPException(status_code=404, detail="no such book for remove")
-    raise HTTPException(status_code=500, detail="no database")
+    del books[found[0]]
+    return
 
 
 if __name__ == "__main__":
