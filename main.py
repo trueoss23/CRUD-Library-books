@@ -23,17 +23,14 @@ books = [
 
 @app.get("/books/", response_model=List[Book])
 async def read_library():
-    if books:
-        return books
-    raise HTTPException(status_code=500, detail="no database")
+    return books
 
 
 @app.get("/book/{book_id}", status_code=200, response_model=Book)
 async def read_book(book_id: int):
-    if books:
-        for book in books:
-            if book.book_id == book_id:
-                return book
+    for book in books:
+        if book.book_id == book_id:
+            return book
     raise HTTPException(status_code=404, detail="no book with this id")
 
 
@@ -57,24 +54,20 @@ def find_id(books: List, book_id: int) -> List:
 
 @app.put("/book/{book_id}", status_code=200)
 async def update_book(new_book: Book, book_id: int = Path(...)):
-    if books:
-        found = find_id(books, book_id)
-        i = found[0]
-        if len(found) == 0:
-            raise HTTPException(status_code=404,
-                                detail="no such book for update")
-        if books[i] == new_book:
-            raise HTTPException(status_code=304,
-                                detail="no data to change")
-        books[i] = new_book
-        return
-    raise HTTPException(status_code=404, detail="no such book")
+    found = find_id(books, book_id)
+    i = found[0]
+    if len(found) == 0:
+        raise HTTPException(status_code=404,
+                            detail="no such book for update")
+    if books[i] == new_book:
+        raise HTTPException(status_code=304,
+                            detail="no data to change")
+    books[i] = new_book
+    return
 
 
 @app.delete("/book/{book_id}", status_code=204)
 async def delete_book(book_id: int = Path(...)):
-    if not books:
-        raise HTTPException(status_code=500, detail="database is down")
     found = find_id(books, book_id)
     if len(found) == 0:
         raise HTTPException(status_code=404, detail="no such book for remove")
